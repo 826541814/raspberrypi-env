@@ -1,0 +1,51 @@
+version: '3.8'
+
+networks:
+  monitor-net:
+    driver: bridge
+  hostnet:
+    external: true
+    name: host
+
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      #- '--log.level=debug'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - node_exporter
+      - grafana
+    networks:
+      - monitor-net
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+      #- '--log.level=debug'
+    networks:
+      - monitor-net
+    pid: host
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    ports:
+      - "3000:3000"
+    networks:
+      - monitor-net
+
+
