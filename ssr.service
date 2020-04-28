@@ -1,1 +1,13 @@
-/etc/systemd/system/ssr.service
+[Unit]
+Description=ssr
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python /home/rry/shadowsocksr/shadowsocks/local.py -c /home/rry/shadowsocksr/config.json start
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target
